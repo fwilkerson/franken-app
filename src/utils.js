@@ -28,13 +28,6 @@ function changed(oldView, newView) {
 
 function diffChildren(oldView, newView) {
   const patches = [];
-  if (
-    typeof oldView.children === 'string' ||
-    typeof newView.children === 'string'
-  ) {
-    patches.push(diff(oldView.children, newView.children));
-    return patches;
-  }
 
   const length = Math.max(oldView.children.length, newView.children.length);
   for (let i = 0; i < length; i++) {
@@ -104,9 +97,7 @@ export function createElement(view) {
 
   const node = document.createElement(view.el);
   setQuirks(node, view.quirks);
-  normalizeChildren(view.children)
-    .map(createElement)
-    .forEach(node.appendChild.bind(node));
+  view.children.map(createElement).forEach(node.appendChild.bind(node));
   return node;
 }
 
@@ -117,6 +108,25 @@ function setQuirks(node, quirks) {
   });
 }
 
-export function normalizeChildren(children) {
-  return Array.isArray(children) ? children : [children];
+export function getEventMap(view) {
+  let events = {};
+  let uniqueEvents = [];
+
+  function mapEvents(view) {
+    if (!view.el) return;
+
+    if (view.events && view.quirks && view.quirks.id) {
+      events[view.quirks.id] = view.events;
+      uniqueEvents = uniqueEvents.concat(
+        Object.keys(view.events).filter(key => {
+          return !uniqueEvents.some(x => x === key);
+        })
+      );
+    }
+
+    view.children.forEach(mapEvents);
+  }
+
+  mapEvents(view);
+  return { events, uniqueEvents };
 }

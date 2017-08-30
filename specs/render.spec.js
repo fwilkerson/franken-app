@@ -7,14 +7,14 @@ const view = props => ({
   el: 'div',
   quirks: { class: 'container' },
   children: [
-    { el: 'h2', quirks: { class: 'heading' }, children: 'view' },
+    { el: 'h2', quirks: { class: 'heading' }, children: ['view'] },
     { el: 'p', children: ['object notation view functions'] }
   ]
 });
 
 test('rendering test', t => {
   const dispose = jsdom(`<div id='root'></div>`);
-  frankenApp().init({ el: 'root', func: view });
+  frankenApp({ el: 'root', func: view })();
   t.ok(document.querySelector('.container'), 'container was rendered');
   t.ok(document.querySelector('.heading'), 'heading was rendered');
   t.ok(document.querySelector('.container > p'), 'paragraph was rendered');
