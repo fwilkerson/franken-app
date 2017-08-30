@@ -1,0 +1,26 @@
+{
+  "name": "franken-app",
+  "version": "1.0.0",
+  "main": "dist/index.min.js",
+  "license": "MIT",
+  "devDependencies": {
+    "babel-core": "^6.26.0",
+    "jsdom": "^11.2.0",
+    "jsdom-global": "^3.0.2",
+    "jshint": "^2.9.5",
+    "rollup": "^0.49.2",
+    "rollup-plugin-babel": "^3.0.2",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.8.0",
+    "uglify-es": "^3.0.28"
+  },
+  "scripts": {
+    "test": "tape specs/**/*.spec.js | tap-spec",
+    "jshint": "jshint ./src",
+    "build": "rollup -c",
+    "uglify": "uglifyjs ./dist/index.js -c -o ./dist/index.min.js"
+  },
+  "jshintConfig": {
+    "esversion": 6
+  }
+}
