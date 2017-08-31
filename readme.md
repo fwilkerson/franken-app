@@ -6,15 +6,15 @@ An exercise to better understand the challenges of building a modern front end f
 const updateMessage = (e, state) =>
     Object.assign({}, state, { message: e.target.value })
 
-const input = ({state, dispatch}) => ({
+const input = (props) => ({
     el: 'input',
     quirks: {
         id: 'message',
         type: 'text',
-        value: state.message
+        value: props.state.message
     },
     events: { 
-        input: (e) => dispatch(updateMessage(e, state))
+        input: (e) => props.dispatch(state => updateMessage(e, state))
     },
     children: []
 })
