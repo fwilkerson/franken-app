@@ -27,19 +27,19 @@ function frankenApp({ el, func, state, actions }) {
   // TODO: Patch event listeners on update
   function listenForEvents({ events, uniqueEvents }, target) {
     uniqueEvents.forEach(event => {
-      target.addEventListener(event, e => routeEvent(event, e.target, e.type));
+      target.addEventListener(event, e => routeEvent(e, e.target));
     });
   }
 
-  function routeEvent(event, target, type) {
+  function routeEvent(e, target) {
     if (!target) return;
 
     const eventHandlers = _eventMap.events[target.id];
-    if (eventHandlers && eventHandlers[type]) {
-      return eventHandlers[type](event);
+    if (eventHandlers && eventHandlers[e.type]) {
+      return eventHandlers[e.type](e);
     }
 
-    routeEvent(event, target.parentElement, type);
+    routeEvent(e, target.parentElement);
   }
 
   function dispatch(updateFunc) {
