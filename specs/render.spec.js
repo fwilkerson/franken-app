@@ -14,7 +14,7 @@ const view = props => ({
 
 test('rendering test', t => {
   const dispose = jsdom(`<div id='root'></div>`);
-  frankenApp({ el: 'root', func: view })();
+  frankenApp({ id: 'root', func: view })();
   t.ok(document.querySelector('.container'), 'container was rendered');
   t.ok(document.querySelector('.heading'), 'heading was rendered');
   t.ok(document.querySelector('.container > p'), 'paragraph was rendered');

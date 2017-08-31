@@ -31,14 +31,12 @@ const counter = ({ state, dispatch }) => ({
   ]
 });
 
-// TODO: Add a test that has an action that relies on a passed in param
-// TODO: Add a test to ensure update event is passed to the event handler
 test('update test', t => {
   const dispose = jsdom(`<div id='root'></div>`);
   const event = document.createEvent('HTMLEvents');
   event.initEvent('click', true, true);
 
-  frankenApp({ el: 'root', func: counter, state: { count: 1 } })();
+  frankenApp({ id: 'root', func: counter, state: { count: 1 } })();
 
   t.equal(
     document.querySelector(`.counter-1`).innerHTML.length,
