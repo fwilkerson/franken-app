@@ -1,6 +1,8 @@
 export default {
-  entry: 'src/app.js',
-  format: 'umd',
+  input: 'src/app.js',
   name: 'frankenApp',
-  dest: 'dist/index.js'
+  output: {
+    file: 'dist/index.js',
+    format: 'umd'
+  }
 };
