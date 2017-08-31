@@ -1,15 +1,15 @@
-import { getEventMap, listenForEvents } from './events';
-import { createElement, diff, patch } from './utils';
+import { createElement, diff, getEventMap, patch } from './utils';
 
-export default function() {
-  let _state;
-  let _target;
-  let _func;
-  let _actions;
+// Consider requiring children be an array like elm does
+
+function frankenApp({ el, func, state, actions }) {
   let _view;
   let _eventMap;
 
-  // TODO: Patch events, add/remove event listeners
+  let _target = document.getElementById(el);
+  let _func = func;
+  let _state = state || {};
+  let _actions = actions || {};
 
   function render(view, target) {
     _eventMap = getEventMap(view);
@@ -18,9 +18,28 @@ export default function() {
   }
 
   function update(view) {
+    _eventMap = getEventMap(view);
     const patches = diff(_view, view);
     patch(_target, patches);
     _view = view;
+  }
+
+  // TODO: Patch event listeners on update
+  function listenForEvents({ events, uniqueEvents }, target) {
+    uniqueEvents.forEach(event => {
+      target.addEventListener(event, e => routeEvent(event, e.target, e.type));
+    });
+  }
+
+  function routeEvent(event, target, type) {
+    if (!target) return;
+
+    const eventHandlers = _eventMap.events[target.id];
+    if (eventHandlers && eventHandlers[type]) {
+      return eventHandlers[type](event);
+    }
+
+    routeEvent(event, target.parentElement, type);
   }
 
   function dispatch(updateFunc) {
@@ -28,14 +47,10 @@ export default function() {
     update(_func({ actions: _actions, state: _state, dispatch }));
   }
 
-  return {
-    init({ el, func, state, actions }) {
-      _target = document.getElementById(el);
-      _func = func;
-      _state = state || {};
-      _actions = actions || {};
-      _view = func({ actions, state, dispatch });
-      render(_view, _target);
-    }
+  return function() {
+    _view = _func({ actions: _actions, state: _state, dispatch });
+    render(_view, _target);
   };
 }
+
+export default frankenApp;

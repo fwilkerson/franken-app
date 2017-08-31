@@ -20,13 +20,13 @@ function Actions({ state, dispatch, actions }) {
         el: 'button',
         quirks: { id: 'btnMore', style: 'margin: 0 0.5em;' },
         events: { click: () => {} },
-        children: 'More'
+        children: ['More']
       },
       {
         el: 'button',
         quirks: { id: 'btnRestart', style: 'margin: 0 0.5em;' },
         events: { click: () => dispatch(actions.updateResults) },
-        children: 'Restart'
+        children: ['Restart']
       }
     ]
   };
@@ -50,7 +50,7 @@ function Link(data) {
       {
         el: 'a',
         quirks: { href: data.url, target: '_blank' },
-        children: data.title
+        children: [data.title]
       },
       SubLink(data)
     ]
@@ -68,7 +68,7 @@ function SubLink({ created, subreddit }) {
       {
         el: 'span',
         quirks: { style: 'margin-left: 0.5em;' },
-        children: `(${createDate.toLocaleDateString()})`
+        children: [`(${createDate.toLocaleDateString()})`]
       }
     ]
   };
@@ -77,7 +77,7 @@ function SubLink({ created, subreddit }) {
 test('stress test', function(t) {
   const dispose = jsdom(`<div id='root'></div>`);
 
-  frankenApp().init({
+  frankenApp({
     el: 'root',
     func: Listings,
     state: { results: data.concat(data) },
@@ -87,7 +87,7 @@ test('stress test', function(t) {
           results: state.results.concat(state.results)
         })
     }
-  });
+  })();
 
   const event = document.createEvent('HTMLEvents');
   event.initEvent('click', true, true);
@@ -113,7 +113,7 @@ test('stress test', function(t) {
 test('remove/replace/append test', function(t) {
   const dispose = jsdom(`<div id='root'></div>`);
 
-  frankenApp().init({
+  frankenApp({
     el: 'root',
     func: Listings,
     state: { results: data.slice(0, 5) },
@@ -123,7 +123,7 @@ test('remove/replace/append test', function(t) {
           results: data.slice(3, 8)
         })
     }
-  });
+  })();
 
   const event = document.createEvent('HTMLEvents');
   event.initEvent('click', true, true);
