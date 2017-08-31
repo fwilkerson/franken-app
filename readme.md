@@ -15,7 +15,8 @@ const input = ({state, dispatch}) => ({
     },
     events: { 
         input: (e) => dispatch(updateMessage(e, state))
-    }
+    },
+    children: []
 })
 
 const view = (props) => ({
