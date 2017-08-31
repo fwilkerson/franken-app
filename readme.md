@@ -28,7 +28,7 @@ const view = (props) => ({
 })
 
 frankenApp({
-    el: 'root',
+    id: 'root',
     func: view,
     state: { message: 'Hello, World!' }
 })();

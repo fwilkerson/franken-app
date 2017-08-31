@@ -78,7 +78,7 @@ test('stress test', function(t) {
   const dispose = jsdom(`<div id='root'></div>`);
 
   frankenApp({
-    el: 'root',
+    id: 'root',
     func: Listings,
     state: { results: data.concat(data) },
     actions: {
@@ -114,7 +114,7 @@ test('remove/replace/append test', function(t) {
   const dispose = jsdom(`<div id='root'></div>`);
 
   frankenApp({
-    el: 'root',
+    id: 'root',
     func: Listings,
     state: { results: data.slice(0, 5) },
     actions: {
