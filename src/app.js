@@ -1,7 +1,5 @@
 import { createElement, diff, getEventMap, patch } from './utils';
 
-// Consider requiring children be an array like elm does
-
 function frankenApp({ id, func, state, actions }) {
   let _view;
   let _eventMap;
