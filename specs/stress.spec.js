@@ -11,31 +11,31 @@ function Listings(props) {
   };
 }
 
-function Actions({ state, dispatch, actions }) {
+function Actions({state, dispatch, actions}) {
   return {
     el: 'div',
-    quirks: { style: 'margin: 1em; text-align: right;' },
+    quirks: {style: 'margin: 1em; text-align: right;'},
     children: [
       {
         el: 'button',
-        quirks: { id: 'btnMore', style: 'margin: 0 0.5em;' },
-        events: { click: () => {} },
+        quirks: {id: 'btnMore', style: 'margin: 0 0.5em;'},
+        events: {click: () => {}},
         children: ['More']
       },
       {
         el: 'button',
-        quirks: { id: 'btnRestart', style: 'margin: 0 0.5em;' },
-        events: { click: () => dispatch(actions.updateResults) },
+        quirks: {id: 'btnRestart', style: 'margin: 0 0.5em;'},
+        events: {click: () => actions.updateResults()},
         children: ['Restart']
       }
     ]
   };
 }
 
-function List({ state }) {
+function List({state}) {
   return {
     el: 'ul',
-    quirks: { style: 'list-style: none; margin: 1em; padding: 0;' },
+    quirks: {style: 'list-style: none; margin: 1em; padding: 0;'},
     children: state.results.map(Link)
   };
 }
@@ -49,7 +49,7 @@ function Link(data) {
     children: [
       {
         el: 'a',
-        quirks: { href: data.url, target: '_blank' },
+        quirks: {href: data.url, target: '_blank'},
         children: [data.title]
       },
       SubLink(data)
@@ -57,17 +57,17 @@ function Link(data) {
   };
 }
 
-function SubLink({ created, subreddit }) {
+function SubLink({created, subreddit}) {
   const createDate = new Date(0);
   createDate.setSeconds(created);
   return {
     el: 'div',
-    quirks: { style: 'margin-top: 0.25em;' },
+    quirks: {style: 'margin-top: 0.25em;'},
     children: [
       `r/${subreddit}`,
       {
         el: 'span',
-        quirks: { style: 'margin-left: 0.5em;' },
+        quirks: {style: 'margin-left: 0.5em;'},
         children: [`(${createDate.toLocaleDateString()})`]
       }
     ]
@@ -80,9 +80,9 @@ test('stress test', function(t) {
   frankenApp({
     id: 'root',
     func: Listings,
-    state: { results: data.concat(data) },
+    state: {results: data.concat(data)},
     actions: {
-      updateResults: state =>
+      updateResults: () => state =>
         Object.assign({}, state, {
           results: state.results.concat(state.results)
         })
@@ -116,9 +116,9 @@ test('remove/replace/append test', function(t) {
   frankenApp({
     id: 'root',
     func: Listings,
-    state: { results: data.slice(0, 5) },
+    state: {results: data.slice(0, 5)},
     actions: {
-      updateResults: state =>
+      updateResults: () => state =>
         Object.assign({}, state, {
           results: data.slice(3, 8)
         })

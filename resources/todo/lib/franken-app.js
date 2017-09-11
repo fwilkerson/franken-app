@@ -5,7 +5,7 @@ const UPDATE_NODE = 'UPDATE_NODE';
 const SET_QUIRK = 'SET_QUIRK';
 const REMOVE_QUIRK = 'REMOVE_QUIRK';
 
-export function diff(oldView, newView) {
+function diff(oldView, newView) {
   if (!oldView) return {type: CREATE_NODE, newView};
   if (!newView) return {type: REMOVE_NODE};
   if (changed(oldView, newView)) return {type: REPLACE_NODE, newView};
@@ -53,7 +53,7 @@ function diffQuirks(oldView, newView) {
   return patches;
 }
 
-export function patch(parent, patches, index = 0) {
+function patch(parent, patches, index = 0) {
   if (!patches) return;
 
   const el =
@@ -92,7 +92,7 @@ function patchQuirk(el, patch) {
   }
 }
 
-export function createElement(view) {
+function createElement(view) {
   if (!view.el) return document.createTextNode(view);
 
   const node = document.createElement(view.el);
@@ -108,7 +108,7 @@ function setQuirks(node, quirks) {
   });
 }
 
-export function getEventMap(view) {
+function getEventMap(view) {
   let events = {};
   let uniqueEvents = [];
 
@@ -132,8 +132,68 @@ function mergeUniqueEvents(first, second) {
 }
 
 // TODO: Write proper diff and handle removal of events
-export function diffEventMap(oldEventMap, newEventMap) {
+function diffEventMap(oldEventMap, newEventMap) {
   const oldEventNames = oldEventMap.uniqueEvents;
   const newEventNames = newEventMap.uniqueEvents;
   return newEventNames.filter(x => !oldEventNames.some(y => x === y));
 }
+
+function frankenApp({id, func, state, actions}) {
+  let _view;
+  let _eventMap;
+
+  let _target = document.getElementById(id);
+  let _func = func;
+  let _state = state || {};
+  let _actions = {};
+  Object.keys(actions || {}).forEach(key => {
+    _actions[key] = (...args) => dispatch(actions[key](...args));
+  });
+
+  function render(view, target) {
+    _eventMap = getEventMap(view);
+    listenForEvents(_eventMap, target);
+    target.appendChild(createElement(view));
+  }
+
+  function update(view) {
+    const eventMap = getEventMap(view);
+    const eventPatches = diffEventMap(_eventMap, eventMap);
+    listenForEvents({uniqueEvents: eventPatches}, _target);
+
+    const patches = diff(_view, view);
+    patch(_target, patches);
+
+    _eventMap = eventMap;
+    _view = view;
+  }
+
+  function listenForEvents({uniqueEvents}, target) {
+    uniqueEvents.forEach(event => {
+      target.addEventListener(event, e => routeEvent(e, e.target));
+    });
+  }
+
+  function routeEvent(e, target) {
+    if (!target) return;
+
+    const eventHandlers = _eventMap.events[target.id];
+    if (eventHandlers && eventHandlers[e.type]) {
+      return eventHandlers[e.type](e);
+    }
+
+    routeEvent(e, target.parentElement);
+  }
+
+  function dispatch(updateFunc) {
+    _state = updateFunc(_state);
+    update(_func({actions: _actions, state: _state, dispatch}));
+  }
+
+  return function() {
+    _view = _func({actions: _actions, state: _state, dispatch});
+    render(_view, _target);
+  };
+}
+
+export default frankenApp;

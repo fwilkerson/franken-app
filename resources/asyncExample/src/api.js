@@ -26,7 +26,7 @@ function getSubReddit(sub, more) {
 
   return fetch(uri + sub + queryString)
     .then(resp => resp.json())
-    .then(({ data }) => mapListing(data.children))
+    .then(({data}) => mapListing(data.children))
     .catch(e => console.error(e));
 }
 
