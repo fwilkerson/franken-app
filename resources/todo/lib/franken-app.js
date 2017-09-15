@@ -57,7 +57,8 @@ function patch(parent, patches, index = 0) {
 	if (!patches) return;
 
 	const el =
-		parent.childNodes[index] || parent.childNodes[parent.childNodes.length - 1];
+		parent.childNodes[index] ||
+		parent.childNodes[parent.childNodes.length - 1];
 
 	switch (patches.type) {
 		case CREATE_NODE:
@@ -87,7 +88,9 @@ function patchQuirk(el, patch) {
 			el.setAttribute(patch.key, patch.value);
 			break;
 		case REMOVE_QUIRK:
-			patch.key === 'value' ? (el.value = '') : el.removeAttribute(patch.key);
+			patch.key === 'value'
+				? (el.value = '')
+				: el.removeAttribute(patch.key);
 			break;
 	}
 }
@@ -117,7 +120,10 @@ function getEventMap(view) {
 
 		if (view.events && view.quirks && view.quirks.id) {
 			events[view.quirks.id] = view.events;
-			uniqueEvents = mergeUniqueEvents(uniqueEvents, Object.keys(view.events));
+			uniqueEvents = mergeUniqueEvents(
+				uniqueEvents,
+				Object.keys(view.events)
+			);
 		}
 
 		view.children.forEach(mapEvents);

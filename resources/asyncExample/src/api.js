@@ -38,6 +38,8 @@ export function loadData(more = false) {
 	queries.push(getSubReddit('r/javascript', more));
 
 	return Promise.all(queries).then(result => {
-		return new Promise(res => res(result.reduce((x, y) => x.concat(y), [])));
+		return new Promise(res =>
+			res(result.reduce((x, y) => x.concat(y), []))
+		);
 	});
 }

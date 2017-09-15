@@ -6,7 +6,7 @@ const SET_QUIRK = 'SET_QUIRK';
 const REMOVE_QUIRK = 'REMOVE_QUIRK';
 
 export function diff(oldView, newView) {
-	if (!oldView) return {type: CREATE_NODE, newView};
+	if (!oldView && newView) return {type: CREATE_NODE, newView};
 	if (!newView) return {type: REMOVE_NODE};
 	if (changed(oldView, newView)) return {type: REPLACE_NODE, newView};
 	if (newView.el) {
@@ -22,18 +22,18 @@ function changed(oldView, newView) {
 	return (
 		typeof oldView !== typeof newView ||
 		(typeof newView === 'string' && oldView !== newView) ||
-		oldView.type !== newView.type
+		oldView.el !== newView.el
 	);
 }
 
 function diffChildren(oldView, newView) {
 	const patches = [];
-
-	const length = Math.max(oldView.children.length, newView.children.length);
+	const oldChildren = oldView.children || [];
+	const newChildren = newView.children || [];
+	const length = Math.max(oldChildren.length, newChildren.length);
 	for (let i = 0; i < length; i++) {
-		patches.push(diff(oldView.children[i], newView.children[i]));
+		patches.push(diff(oldChildren[i], newChildren[i]));
 	}
-
 	return patches;
 }
 
@@ -55,9 +55,9 @@ function diffQuirks(oldView, newView) {
 
 export function patch(parent, patches, index = 0) {
 	if (!patches) return;
-
 	const el =
-		parent.childNodes[index] || parent.childNodes[parent.childNodes.length - 1];
+		parent.childNodes[index] ||
+		parent.childNodes[parent.childNodes.length - 1];
 
 	switch (patches.type) {
 		case CREATE_NODE:
@@ -70,11 +70,8 @@ export function patch(parent, patches, index = 0) {
 			parent.replaceChild(createElement(patches.newView), el);
 			break;
 		case UPDATE_NODE:
-			const {children, quirks} = patches;
-			quirks.forEach(patchQuirk.bind(null, el));
-			for (let i = 0, l = children.length; i < l; i++) {
-				patch(el, children[i], i);
-			}
+			patches.quirks.forEach(q => patchQuirk(el, q));
+			patches.children.forEach((c, i) => patch(el, c, i));
 			break;
 		default:
 			break;
@@ -87,7 +84,9 @@ function patchQuirk(el, patch) {
 			el.setAttribute(patch.key, patch.value);
 			break;
 		case REMOVE_QUIRK:
-			patch.key === 'value' ? (el.value = '') : el.removeAttribute(patch.key);
+			patch.key === 'value'
+				? (el.value = '')
+				: el.removeAttribute(patch.key);
 			break;
 	}
 }
@@ -95,17 +94,13 @@ function patchQuirk(el, patch) {
 export function createElement(view) {
 	if (!view.el) return document.createTextNode(view);
 
-	const node = document.createElement(view.el);
-	setQuirks(node, view.quirks);
-	view.children.map(createElement).forEach(node.appendChild.bind(node));
-	return node;
-}
+	const element = document.createElement(view.el);
+	const quirks = view.quirks || {};
+	const children = view.children || [];
 
-function setQuirks(node, quirks) {
-	if (!quirks) return;
-	Object.keys(quirks).forEach(key => {
-		node.setAttribute(key, quirks[key]);
-	});
+	Object.keys(quirks).forEach(k => element.setAttribute(k, quirks[k]));
+	children.forEach(c => c && element.appendChild(createElement(c)));
+	return element;
 }
 
 export function getEventMap(view) {
@@ -113,14 +108,16 @@ export function getEventMap(view) {
 	let uniqueEvents = [];
 
 	function mapEvents(view) {
-		if (!view.el) return;
+		if (!view || !view.el) return;
 
 		if (view.events && view.quirks && view.quirks.id) {
 			events[view.quirks.id] = view.events;
-			uniqueEvents = mergeUniqueEvents(uniqueEvents, Object.keys(view.events));
+			uniqueEvents = mergeUniqueEvents(
+				uniqueEvents,
+				Object.keys(view.events)
+			);
 		}
-
-		view.children.forEach(mapEvents);
+		(view.children || []).forEach(mapEvents);
 	}
 
 	mapEvents(view);

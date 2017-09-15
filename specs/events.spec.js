@@ -21,8 +21,7 @@ const input = props => ({
 	events: {
 		input: e => props.dispatch(updateMessage(e.target.value)),
 		keydown: e => props.dispatch(addMessage)
-	},
-	children: []
+	}
 });
 
 const li = dispatch => (message, i) => ({

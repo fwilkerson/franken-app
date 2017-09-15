@@ -28,7 +28,9 @@ function actions({state, dispatch}) {
 				quirks: {id: 'btnMore', style: 'margin: 0 0.5em;'},
 				events: {
 					click: () => {
-						loadData(true).then(results => dispatch(updateResults(results)));
+						loadData(true).then(results =>
+							dispatch(updateResults(results))
+						);
 					}
 				},
 				children: ['More']
@@ -38,7 +40,9 @@ function actions({state, dispatch}) {
 				quirks: {id: 'btnRestart', style: 'margin: 0 0.5em;'},
 				events: {
 					click: () => {
-						loadData().then(results => dispatch(updateResults(results)));
+						loadData().then(results =>
+							dispatch(updateResults(results))
+						);
 					}
 				},
 				children: ['Restart']

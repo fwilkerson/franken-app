@@ -22,7 +22,9 @@ const counter = ({state, dispatch}) => ({
 			quirks: {id: 'btnIncrement'},
 			events: {
 				click: () =>
-					dispatch(state => Object.assign({}, state, {count: state.count + 1}))
+					dispatch(state =>
+						Object.assign({}, state, {count: state.count + 1})
+					)
 			},
 			children: ['Increment']
 		}
