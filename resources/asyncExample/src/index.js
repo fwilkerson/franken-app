@@ -1,4 +1,4 @@
-import frankenApp from '../../../dist/index.min.js';
+import frankenApp from '../../../dist/franken-app.js';
 import {loadData} from './api.js';
 
 loadData().then(results => {

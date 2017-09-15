@@ -1,7 +1,7 @@
 const test = require('tape');
 const jsdom = require('jsdom-global');
 
-const frankenApp = require('../dist');
+const frankenApp = require('../dist/franken-app.cjs');
 
 const updateMessage = message => state => Object.assign({}, state, {message});
 const addMessage = state =>

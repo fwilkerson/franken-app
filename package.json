@@ -1,7 +1,7 @@
 {
 	"name": "franken-app",
 	"version": "1.0.0",
-	"main": "dist/index.min.js",
+	"main": "dist/franken-app.js",
 	"license": "MIT",
 	"devDependencies": {
 		"jsdom": "^11.2.0",
@@ -9,14 +9,12 @@
 		"prettier": "^1.7.0",
 		"rollup": "^0.49.2",
 		"tap-spec": "^4.1.1",
-		"tape": "^4.8.0",
-		"uglify-es": "^3.0.28"
+		"tape": "^4.8.0"
 	},
 	"scripts": {
 		"build": "rollup -c",
 		"prettier": "prettier  -l \"src/**/*.js\"",
-		"test": "tape specs/**/*.spec.js | tap-spec",
-		"uglify": "uglifyjs ./dist/index.js -c -o ./dist/index.min.js"
+		"test": "tape specs/**/*.spec.js | tap-spec"
 	},
 	"prettier": {
 		"bracketSpacing": false,

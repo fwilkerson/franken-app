@@ -1,4 +1,4 @@
-import frankenApp from '../../../dist/index.min.js';
+import frankenApp from '../../../dist/franken-app.js';
 
 const updateMessage = message => state => Object.assign({}, state, {message});
 

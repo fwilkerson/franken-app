@@ -1,7 +1,7 @@
 const test = require('tape');
 const jsdom = require('jsdom-global');
 
-const frankenApp = require('../dist');
+const frankenApp = require('../dist/franken-app.cjs');
 
 const view = props => ({
 	el: 'div',
