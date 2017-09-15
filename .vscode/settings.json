@@ -1,7 +1,3 @@
 {
-  "editor.tabSize": 2,
-  "editor.formatOnSave": true,
-  "editor.insertSpaces": true,
-  "prettier.singleQuote": true,
-  "prettier.bracketSpacing": false
+	"editor.formatOnSave": true
 }
