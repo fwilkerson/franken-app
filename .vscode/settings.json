@@ -1,7 +1,8 @@
 {
-  "editor.tabSize": 2,
-  "editor.formatOnSave": true,
-  "editor.insertSpaces": true,
-  "prettier.singleQuote": true,
-  "prettier.bracketSpacing": false
+	"editor.formatOnSave": true,
+	"editor.tabSize": 4,
+	"prettier.bracketSpacing": false,
+	"prettier.singleQuote": true,
+	"prettier.tabWidth": 4,
+	"prettier.useTabs": true
 }

@@ -33,14 +33,22 @@ frankenApp({
 
 ## Describing markup
 
-HTML is described with a javascript object. The object has four properties, two of which are required.
+HTML is described with a javascript object. The object has four properties, ~~two of which are required~~. Children are no longer required, I found it annoying having to declare them on icons and inputs.
 
 | Name | Type | Description | Required |
 | ---- | ---- | ----------- | -------- |
 | el | string | The type of html element | true | &nbsp; |
-| children | array | The child nodes of the element expressed as strings or objects | true | &nbsp; |
+| children | array | The child nodes of the element expressed as strings or objects | false | &nbsp; |
 | quirks | object | Attributes the element may have e.g. class, id, style, etc | false | &nbsp; |
 | events | object | A key value pair of event name and handler function | false | &nbsp; |
+
+### More on el
+
+After dogfooding franken-app a bit, I found it really annoying to have to declare a quirks object everytime I needed something as simple as an id (for events) or a class (super common when using a css framework). This made me think of how much I enjoyed using emmet/jade/pug because it greatly simplified these common scenarios.
+
+`el: 'div#myDivId.myDivClassName.anotherClassName'`
+
+Now when declaring an element, you can use '#' to indicate an id for the element, and '.' to indicate classes.
 
 ### More on events
 
@@ -81,13 +89,26 @@ frankenApp({
 })();
 ```
 
+### More on dispatch
+
+As I worked on more asynchronous code, I found myself wanting access to the dispatch function outside of view functions. Now, after invoking the render function of frankenApp dispatch is returned.
+
+```javascript
+const dispatch = frankenApp({
+  id: 'root',
+  func: () => ({el: 'h2', children: ['Hello World']})
+})();
+```
+
+Since frankenApp has no lifecycle hooks, getting dispatch like this is especially useful when you need to preload some data.
+
 ## Virtual DOM
 
-A primitive virtual DOM is used to attempt to give efficient re-renders. The first iteration of this experiment built a string & set the innertHTML of the root element. Each render became noticeable when a large number of elements were added to the screen. The addition of the virtual DOM fixed this, but it is by no means complete or as sophisticated as a true virtual DOM.
+A primitive virtual DOM is used to attempt to give efficient re-renders. The first iteration of this experiment built a string & set the innerHTML of the root element. Each render became noticeable when a large number of elements were added to the screen. The addition of the virtual DOM fixed this, but it is by no means complete or as sophisticated as a true virtual DOM.
 
 ## Small footprint
 
-A minified gzipped version of franken-app is 1.9kb. The goal with franken-app was to stick with the basics and give the minimum feature set other libraries give. The small footprint is due to a tight coupling of the renderer with the DOM, no synthetic events, and a lack of lifecycle hooks.
+A minified gzipped version of franken-app is 1.7kb. The goal with franken-app was to stick with the basics and give the minimum feature set other libraries give. The small footprint is due to a tight coupling of the renderer with the DOM, no synthetic events, and a lack of lifecycle hooks.
 
 ## Learn More
 
