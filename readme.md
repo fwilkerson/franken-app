@@ -108,7 +108,7 @@ A primitive virtual DOM is used to attempt to give efficient re-renders. The fir
 
 ## Small footprint
 
-A minified gzipped version of franken-app is 1.9kb. The goal with franken-app was to stick with the basics and give the minimum feature set other libraries give. The small footprint is due to a tight coupling of the renderer with the DOM, no synthetic events, and a lack of lifecycle hooks.
+A minified gzipped version of franken-app is 1.7kb. The goal with franken-app was to stick with the basics and give the minimum feature set other libraries give. The small footprint is due to a tight coupling of the renderer with the DOM, no synthetic events, and a lack of lifecycle hooks.
 
 ## Learn More
 
