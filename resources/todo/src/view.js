@@ -13,8 +13,7 @@ const input = (id, value, onInput, onSubmit) => ({
 	events: {
 		input: e => onInput(e.target.value),
 		keydown: e => e.keyCode === 13 && onSubmit()
-	},
-	children: []
+	}
 });
 
 const todoList = (todos, onClick) => ({
@@ -27,8 +26,7 @@ const todoItem = onClick => (todo, i) => ({
 	quirks: {class: todo.complete ? 'complete' : ''},
 	children: [
 		{
-			el: 'a',
-			quirks: {id: `todo-${i}`},
+			el: `a#todo-${i}`,
 			events: {click: () => onClick(i)},
 			children: [todo.text]
 		}

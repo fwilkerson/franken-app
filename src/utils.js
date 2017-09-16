@@ -19,7 +19,7 @@ function normalizeQuirks(quirks, inlineQuirks) {
 function diffQuirks(oldView, newView) {
 	const patches = [];
 
-	const [newEl, ...newInline] = newView.el.match(/.?[^\s][^\.|#]*/g);
+	const [newEl, ...newInline] = newView.el.match(/.?[^\.|#]*/g);
 	newView.quirks = normalizeQuirks(newView.quirks, newInline);
 
 	const quirks = Object.assign({}, oldView.quirks, newView.quirks);
@@ -83,7 +83,7 @@ export function diff(oldView, newView) {
 export function createElement(view) {
 	if (!view.el) return document.createTextNode(view);
 
-	const [el, ...rest] = view.el.match(/.?[^\s][^\.|#]*/g);
+	const [el, ...rest] = view.el.match(/.?[^\.|#]*/g);
 	const node = document.createElement(el);
 	view.quirks = normalizeQuirks(view.quirks, rest);
 	view.children = view.children || [];
