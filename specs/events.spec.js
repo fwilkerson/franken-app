@@ -12,9 +12,8 @@ const removeMessage = id => state =>
 	});
 
 const input = props => ({
-	el: 'input',
+	el: 'input#message',
 	quirks: {
-		id: 'message',
 		type: 'text',
 		value: props.state.message
 	},

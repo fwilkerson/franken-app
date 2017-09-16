@@ -13,18 +13,18 @@ function frankenApp({id, func, state, actions, subscribe}) {
 	});
 
 	function render(view, target) {
+		target.appendChild(createElement(view));
 		_eventMap = getEventMap(view);
 		listenForEvents(_eventMap, target);
-		target.appendChild(createElement(view));
 	}
 
 	function update(view) {
+		const patches = diff(_view, view);
+		patch(_target, patches);
+
 		const eventMap = getEventMap(view);
 		const eventPatches = diffEventMap(_eventMap, eventMap);
 		listenForEvents({uniqueEvents: eventPatches}, _target);
-
-		const patches = diff(_view, view);
-		patch(_target, patches);
 
 		_eventMap = eventMap;
 		_view = view;

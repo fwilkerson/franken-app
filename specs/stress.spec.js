@@ -17,14 +17,14 @@ function Actions({state, dispatch, actions}) {
 		quirks: {style: 'margin: 1em; text-align: right;'},
 		children: [
 			{
-				el: 'button',
+				el: 'button#btnMore',
 				quirks: {id: 'btnMore', style: 'margin: 0 0.5em;'},
 				events: {click: () => {}},
 				children: ['More']
 			},
 			{
-				el: 'button',
-				quirks: {id: 'btnRestart', style: 'margin: 0 0.5em;'},
+				el: 'button#btnRestart',
+				quirks: {style: 'margin: 0 0.5em;'},
 				events: {click: () => actions.updateResults()},
 				children: ['Restart']
 			}

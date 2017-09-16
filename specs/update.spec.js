@@ -8,8 +8,7 @@ const count = length => {
 };
 
 const counter = ({state, dispatch}) => ({
-	el: 'div',
-	quirks: {class: 'container', id: 'divContainer'},
+	el: 'div.container#divContainer',
 	events: {mouseover: () => {}},
 	children: [
 		{
@@ -18,8 +17,7 @@ const counter = ({state, dispatch}) => ({
 			children: count(state.count)
 		},
 		{
-			el: 'button',
-			quirks: {id: 'btnIncrement'},
+			el: 'button#btnIncrement',
 			events: {
 				click: () =>
 					dispatch(state =>

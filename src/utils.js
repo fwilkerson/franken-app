@@ -5,16 +5,46 @@ const UPDATE_NODE = 'UPDATE_NODE';
 const SET_QUIRK = 'SET_QUIRK';
 const REMOVE_QUIRK = 'REMOVE_QUIRK';
 
-export function diff(oldView, newView) {
-	if (!oldView && newView) return {type: CREATE_NODE, newView};
-	if (!newView) return {type: REMOVE_NODE};
-	if (changed(oldView, newView)) return {type: REPLACE_NODE, newView};
-	if (newView.el) {
-		return {
-			type: UPDATE_NODE,
-			children: diffChildren(oldView, newView),
-			quirks: diffQuirks(oldView, newView)
-		};
+function normalizeQuirks(quirks, inlineQuirks) {
+	let norm = quirks || {};
+	(inlineQuirks || []).forEach(q => {
+		if (q.startsWith('#')) norm.id = q.slice(1);
+		else if (q.startsWith('.')) {
+			norm.class = (norm.class || '').concat(q.replace('.', ' '));
+		}
+	});
+	return norm;
+}
+
+function diffQuirks(oldView, newView) {
+	const patches = [];
+
+	const [newEl, ...newInline] = newView.el.match(/.?[^\s][^\.|#]*/g);
+	newView.quirks = normalizeQuirks(newView.quirks, newInline);
+
+	const quirks = Object.assign({}, oldView.quirks, newView.quirks);
+	Object.keys(quirks).forEach(key => {
+		const oldVal = oldView.quirks[key];
+		const newVal = newView.quirks[key];
+		if (!newVal) {
+			patches.push({type: REMOVE_QUIRK, key, value: oldVal});
+		} else if (!oldVal || oldVal !== newVal) {
+			patches.push({type: SET_QUIRK, key, value: newVal});
+		}
+	});
+	return patches;
+}
+
+function patchQuirk(el, patch) {
+	switch (patch.type) {
+		case SET_QUIRK:
+			el.setAttribute(patch.key, patch.value);
+			break;
+		case REMOVE_QUIRK:
+			patch.key === 'value'
+				? (el.value = '')
+				: el.removeAttribute(patch.key);
+			break;
 	}
 }
 
@@ -37,20 +67,30 @@ function diffChildren(oldView, newView) {
 	return patches;
 }
 
-function diffQuirks(oldView, newView) {
-	const patches = [];
-	const quirks = Object.assign({}, oldView.quirks, newView.quirks);
-	Object.keys(quirks).forEach(key => {
-		const oldVal = oldView.quirks[key];
-		const newVal = newView.quirks[key];
+export function diff(oldView, newView) {
+	if (!oldView && newView) return {type: CREATE_NODE, newView};
+	if (!newView) return {type: REMOVE_NODE};
+	if (changed(oldView, newView)) return {type: REPLACE_NODE, newView};
+	if (newView.el) {
+		return {
+			type: UPDATE_NODE,
+			children: diffChildren(oldView, newView),
+			quirks: diffQuirks(oldView, newView)
+		};
+	}
+}
 
-		if (!newVal) {
-			patches.push({type: REMOVE_QUIRK, key, value: oldVal});
-		} else if (!oldVal || oldVal !== newVal) {
-			patches.push({type: SET_QUIRK, key, value: newVal});
-		}
-	});
-	return patches;
+export function createElement(view) {
+	if (!view.el) return document.createTextNode(view);
+
+	const [el, ...rest] = view.el.match(/.?[^\s][^\.|#]*/g);
+	const node = document.createElement(el);
+	view.quirks = normalizeQuirks(view.quirks, rest);
+	view.children = view.children || [];
+
+	Object.keys(view.quirks).forEach(k => node.setAttribute(k, view.quirks[k]));
+	view.children.forEach(c => c && node.appendChild(createElement(c)));
+	return node;
 }
 
 export function patch(parent, patches, index = 0) {
@@ -78,38 +118,12 @@ export function patch(parent, patches, index = 0) {
 	}
 }
 
-function patchQuirk(el, patch) {
-	switch (patch.type) {
-		case SET_QUIRK:
-			el.setAttribute(patch.key, patch.value);
-			break;
-		case REMOVE_QUIRK:
-			patch.key === 'value'
-				? (el.value = '')
-				: el.removeAttribute(patch.key);
-			break;
-	}
-}
-
-export function createElement(view) {
-	if (!view.el) return document.createTextNode(view);
-
-	const element = document.createElement(view.el);
-	const quirks = view.quirks || {};
-	const children = view.children || [];
-
-	Object.keys(quirks).forEach(k => element.setAttribute(k, quirks[k]));
-	children.forEach(c => c && element.appendChild(createElement(c)));
-	return element;
-}
-
 export function getEventMap(view) {
 	let events = {};
 	let uniqueEvents = [];
 
 	function mapEvents(view) {
 		if (!view || !view.el) return;
-
 		if (view.events && view.quirks && view.quirks.id) {
 			events[view.quirks.id] = view.events;
 			uniqueEvents = mergeUniqueEvents(

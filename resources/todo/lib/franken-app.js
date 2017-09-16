@@ -5,45 +5,27 @@ const UPDATE_NODE = 'UPDATE_NODE';
 const SET_QUIRK = 'SET_QUIRK';
 const REMOVE_QUIRK = 'REMOVE_QUIRK';
 
-function diff(oldView, newView) {
-	if (!oldView) return {type: CREATE_NODE, newView};
-	if (!newView) return {type: REMOVE_NODE};
-	if (changed(oldView, newView)) return {type: REPLACE_NODE, newView};
-	if (newView.el) {
-		return {
-			type: UPDATE_NODE,
-			children: diffChildren(oldView, newView),
-			quirks: diffQuirks(oldView, newView)
-		};
-	}
-}
-
-function changed(oldView, newView) {
-	return (
-		typeof oldView !== typeof newView ||
-		(typeof newView === 'string' && oldView !== newView) ||
-		oldView.type !== newView.type
-	);
-}
-
-function diffChildren(oldView, newView) {
-	const patches = [];
-
-	const length = Math.max(oldView.children.length, newView.children.length);
-	for (let i = 0; i < length; i++) {
-		patches.push(diff(oldView.children[i], newView.children[i]));
-	}
-
-	return patches;
+function normalizeQuirks(quirks, inlineQuirks) {
+	let norm = quirks || {};
+	(inlineQuirks || []).forEach(q => {
+		if (q.startsWith('#')) norm.id = q.slice(1);
+		else if (q.startsWith('.')) {
+			norm.class = (norm.class || '').concat(q.replace('.', ' '));
+		}
+	});
+	return norm;
 }
 
 function diffQuirks(oldView, newView) {
 	const patches = [];
+
+	const [newEl, ...newInline] = newView.el.match(/.?[^\s][^\.|#]*/g);
+	newView.quirks = normalizeQuirks(newView.quirks, newInline);
+
 	const quirks = Object.assign({}, oldView.quirks, newView.quirks);
 	Object.keys(quirks).forEach(key => {
 		const oldVal = oldView.quirks[key];
 		const newVal = newView.quirks[key];
-
 		if (!newVal) {
 			patches.push({type: REMOVE_QUIRK, key, value: oldVal});
 		} else if (!oldVal || oldVal !== newVal) {
@@ -51,35 +33,6 @@ function diffQuirks(oldView, newView) {
 		}
 	});
 	return patches;
-}
-
-function patch(parent, patches, index = 0) {
-	if (!patches) return;
-
-	const el =
-		parent.childNodes[index] ||
-		parent.childNodes[parent.childNodes.length - 1];
-
-	switch (patches.type) {
-		case CREATE_NODE:
-			parent.appendChild(createElement(patches.newView));
-			break;
-		case REMOVE_NODE:
-			if (el) parent.removeChild(el);
-			break;
-		case REPLACE_NODE:
-			parent.replaceChild(createElement(patches.newView), el);
-			break;
-		case UPDATE_NODE:
-			const {children, quirks} = patches;
-			quirks.forEach(patchQuirk.bind(null, el));
-			for (let i = 0, l = children.length; i < l; i++) {
-				patch(el, children[i], i);
-			}
-			break;
-		default:
-			break;
-	}
 }
 
 function patchQuirk(el, patch) {
@@ -95,20 +48,74 @@ function patchQuirk(el, patch) {
 	}
 }
 
+function changed(oldView, newView) {
+	return (
+		typeof oldView !== typeof newView ||
+		(typeof newView === 'string' && oldView !== newView) ||
+		oldView.el !== newView.el
+	);
+}
+
+function diffChildren(oldView, newView) {
+	const patches = [];
+	const oldChildren = oldView.children || [];
+	const newChildren = newView.children || [];
+	const length = Math.max(oldChildren.length, newChildren.length);
+	for (let i = 0; i < length; i++) {
+		patches.push(diff(oldChildren[i], newChildren[i]));
+	}
+	return patches;
+}
+
+function diff(oldView, newView) {
+	if (!oldView && newView) return {type: CREATE_NODE, newView};
+	if (!newView) return {type: REMOVE_NODE};
+	if (changed(oldView, newView)) return {type: REPLACE_NODE, newView};
+	if (newView.el) {
+		return {
+			type: UPDATE_NODE,
+			children: diffChildren(oldView, newView),
+			quirks: diffQuirks(oldView, newView)
+		};
+	}
+}
+
 function createElement(view) {
 	if (!view.el) return document.createTextNode(view);
 
-	const node = document.createElement(view.el);
-	setQuirks(node, view.quirks);
-	view.children.map(createElement).forEach(node.appendChild.bind(node));
+	const [el, ...rest] = view.el.match(/.?[^\s][^\.|#]*/g);
+	const node = document.createElement(el);
+	view.quirks = normalizeQuirks(view.quirks, rest);
+	view.children = view.children || [];
+
+	Object.keys(view.quirks).forEach(k => node.setAttribute(k, view.quirks[k]));
+	view.children.forEach(c => c && node.appendChild(createElement(c)));
 	return node;
 }
 
-function setQuirks(node, quirks) {
-	if (!quirks) return;
-	Object.keys(quirks).forEach(key => {
-		node.setAttribute(key, quirks[key]);
-	});
+function patch(parent, patches, index = 0) {
+	if (!patches) return;
+	const el =
+		parent.childNodes[index] ||
+		parent.childNodes[parent.childNodes.length - 1];
+
+	switch (patches.type) {
+		case CREATE_NODE:
+			parent.appendChild(createElement(patches.newView));
+			break;
+		case REMOVE_NODE:
+			if (el) parent.removeChild(el);
+			break;
+		case REPLACE_NODE:
+			parent.replaceChild(createElement(patches.newView), el);
+			break;
+		case UPDATE_NODE:
+			patches.quirks.forEach(q => patchQuirk(el, q));
+			patches.children.forEach((c, i) => patch(el, c, i));
+			break;
+		default:
+			break;
+	}
 }
 
 function getEventMap(view) {
@@ -116,8 +123,7 @@ function getEventMap(view) {
 	let uniqueEvents = [];
 
 	function mapEvents(view) {
-		if (!view.el) return;
-
+		if (!view || !view.el) return;
 		if (view.events && view.quirks && view.quirks.id) {
 			events[view.quirks.id] = view.events;
 			uniqueEvents = mergeUniqueEvents(
@@ -125,8 +131,7 @@ function getEventMap(view) {
 				Object.keys(view.events)
 			);
 		}
-
-		view.children.forEach(mapEvents);
+		(view.children || []).forEach(mapEvents);
 	}
 
 	mapEvents(view);
@@ -157,18 +162,18 @@ function frankenApp({id, func, state, actions, subscribe}) {
 	});
 
 	function render(view, target) {
+		target.appendChild(createElement(view));
 		_eventMap = getEventMap(view);
 		listenForEvents(_eventMap, target);
-		target.appendChild(createElement(view));
 	}
 
 	function update(view) {
+		const patches = diff(_view, view);
+		patch(_target, patches);
+
 		const eventMap = getEventMap(view);
 		const eventPatches = diffEventMap(_eventMap, eventMap);
 		listenForEvents({uniqueEvents: eventPatches}, _target);
-
-		const patches = diff(_view, view);
-		patch(_target, patches);
 
 		_eventMap = eventMap;
 		_view = view;

@@ -4,8 +4,7 @@ const jsdom = require('jsdom-global');
 const frankenApp = require('../dist/franken-app.cjs');
 
 const view = props => ({
-	el: 'div',
-	quirks: {class: 'container'},
+	el: 'div.container',
 	children: [
 		{el: 'h2', quirks: {class: 'heading'}, children: ['view']},
 		{el: 'p', children: ['object notation view functions']}
