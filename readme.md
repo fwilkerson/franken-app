@@ -96,8 +96,8 @@ As I worked on more asynchronous code, I found myself wanting access to the disp
 ```javascript
 const dispatch = frankenApp({
   id: 'root',
-  func: () => ({el: 'h2', children: ['Hello World']
-}))();
+  func: () => ({el: 'h2', children: ['Hello World']})
+})();
 ```
 
 Since frankenApp has no lifecycle hooks, getting dispatch like this is especially useful when you need to preload some data.
